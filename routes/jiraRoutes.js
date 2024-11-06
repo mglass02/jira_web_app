@@ -10,6 +10,11 @@ const authHeader = {
     'Content-Type': 'application/json'
 };
 
+
+app.get('/home', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Home route with buttons for different Jira actions
 router.get('/', (req, res) => {
     res.render('layout', { data: null, error: null, view: 'home' });
