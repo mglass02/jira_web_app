@@ -11,10 +11,6 @@ const authHeader = {
 };
 
 
-app.get('/home', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 // Home route with buttons for different Jira actions
 router.get('/', (req, res) => {
     res.render('layout', { data: null, error: null, view: 'home' });
@@ -24,11 +20,26 @@ router.get('/', (req, res) => {
 router.post('/projects', async (req, res) => {
     try {
         const response = await axios.get(`${jiraBaseUrl}/rest/api/3/project`, { headers: authHeader });
-        res.render('layout', { data: response.data, error: null, view: 'projects' });
+        
+        // Check the response structure
+        //console.log(response.data); // Debugging
+
+        // Format the data to include only relevant project details
+        const projects = response.data.map(project => ({
+            id: project.id,
+            key: project.key,
+            name: project.name
+        }));
+
+        // Render the data
+        res.render('layout', { data: projects, error: null, view: 'projects' });
     } catch (error) {
-        res.render('layout', { data: null, error: 'Failed to fetch projects.', view: 'home' });
+        console.error(error.response ? error.response.data : error.message); // Enhanced error logging
+        res.render('layout', { data: null, error: 'Failed to fetch projects. Check your credentials and try again.', view: 'home' });
     }
 });
+
+
 
 // Route to fetch sprints of a specific project
 router.post('/sprints', async (req, res) => {
