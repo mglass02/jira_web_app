@@ -5,110 +5,63 @@
     <meta http-equiv="X-UA-Compatible=IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jira Dashboard</title>
+    <link rel="stylesheet" href="/styles/styles.css">
 </head>
 <body>
     <header>
         <h1>Jira Project Dashboard</h1>
     </header>
     <main>
-        <form action="/projects" method="POST">
-            <button type="submit">Show All Projects</button>
-        </form>
-        <form action="/sprints" method="POST">
-            <input type="text" name="projectId" placeholder="Enter Project ID" required>
-            <button type="submit">Show Sprints of Project</button>
-        </form>
-        <form action="/current-sprint" method="POST">
-            <input type="text" name="boardId" placeholder="Enter Board ID" required>
-            <button type="submit">Show Current Sprint</button>
-        </form>
-        <form action="/sprint-issues" method="POST">
-            <input type="text" name="sprintId" placeholder="Enter Sprint ID" required>
-            <button type="submit">Show Issues in Current Sprint</button>
-        </form>
-        <form action="/assigned-issues" method="POST">
-            <input type="text" name="sprintId" placeholder="Enter Sprint ID" required>
-            <button type="submit">Show Assigned Issues</button>
-        </form>
-        <form action="/unassigned-issues" method="POST">
-            <input type="text" name="sprintId" placeholder="Enter Sprint ID" required>
-            <button type="submit">Show Unassigned Issues</button>
+        <form action="/projects" method="POST" id="projectsForm">
+            <button type="button" id="toggleProjectsBtn">Show My Projects</button>
         </form>
 
-        <% if (error) { %>
-            <p style="color: red;"><%= error %></p>
-        <% } %>
-
-        <% if (data && view === 'projects') { %>
-            <h2>Projects</h2>
-            <ul>
-                <% data.forEach(project => { %>
-                    <li><strong><%= project.name %></strong> (Key: <%= project.key %>)</li>
-                <% }); %>
-            </ul>
-        <% } else if (data && view === 'sprints') { %>
-            <h2>Sprints</h2>
-            <ul>
-                <% data.values.forEach(sprint => { %>
-                    <li><strong><%= sprint.name %></strong> (State: <%=
-                        sprint.state %>)
-                        <p>Start Date: <%= sprint.startDate %></p>
-                        <p>End Date: <%= sprint.endDate %></p>
-                    </li>
-                <% }); %>
-            </ul>
-        <% } else if (data && view === 'current-sprint') { %>
-            <h2>Current Sprint</h2>
-            <% if (data) { %>
-                <p><strong>Name:</strong> <%= data.name %></p>
-                <p><strong>State:</strong> <%= data.state %></p>
-                <p><strong>Start Date:</strong> <%= data.startDate %></p>
-                <p><strong>End Date:</strong> <%= data.endDate %></p>
-            <% } else { %>
-                <p>No active sprint found.</p>
+        <!-- Set a data attribute to indicate if data is rendered -->
+        <div id="projectsContainer" style="display: none;" data-has-data="<%= data && view === 'projects' ? 'true' : 'false' %>">
+            <% if (data && view === 'projects') { %>
+                <h2>Projects</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Project ID</th>
+                            <th>Project Key</th>
+                            <th>Project Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% data.forEach(project => { %>
+                            <tr>
+                                <td><%= project.id %></td>
+                                <td><%= project.key %></td>
+                                <td><%= project.name %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
             <% } %>
-        <% } else if (data && view === 'sprint-issues') { %>
-            <h2>Issues in Current Sprint</h2>
-            <ul>
-                <% data.forEach(issue => { %>
-                    <li>
-                        <strong><%= issue.key %></strong>: <%= issue.fields.summary %>
-                        <p>Status: <%= issue.fields.status.name %></p>
-                        <p>Assignee: <%= issue.fields.assignee ? issue.fields.assignee.displayName : 'Unassigned' %></p>
-                    </li>
-                <% }); %>
-            </ul>
-        <% } else if (data && view === 'assigned-issues') { %>
-            <h2>Assigned Issues</h2>
-            <ul>
-                <% if (data.length > 0) { %>
-                    <% data.forEach(issue => { %>
-                        <li>
-                            <strong><%= issue.key %></strong>: <%= issue.fields.summary %>
-                            <p>Status: <%= issue.fields.status.name %></p>
-                            <p>Assignee: <%= issue.fields.assignee.displayName %></p>
-                        </li>
-                    <% }); %>
-                <% } else { %>
-                    <p>No assigned issues found for the current user.</p>
-                <% } %>
-            </ul>
-        <% } else if (data && view === 'unassigned-issues') { %>
-            <h2>Unassigned Issues</h2>
-            <ul>
-                <% if (data.length > 0) { %>
-                    <% data.forEach(issue => { %>
-                        <li>
-                            <strong><%= issue.key %></strong>: <%= issue.fields.summary %>
-                            <p>Status: <%= issue.fields.status.name %></p>
-                            <p>Assignee: Unassigned</p>
-                        </li>
-                    <% }); %>
-                <% } else { %>
-                    <p>No unassigned issues found.</p>
-                <% } %>
-            </ul>
-        <% } %>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const projectsContainer = document.getElementById('projectsContainer');
+                const toggleProjectsBtn = document.getElementById('toggleProjectsBtn');
+
+                // Check if data is rendered using the data attribute
+                if (projectsContainer.dataset.hasData === 'true') {
+                    projectsContainer.style.display = 'block';
+                    toggleProjectsBtn.textContent = 'Show My Projects';
+                }
+
+                toggleProjectsBtn.addEventListener('click', function() {
+                    if (projectsContainer.style.display === 'none' || projectsContainer.style.display === '') {
+                        document.getElementById('projectsForm').submit();
+                    } else {
+                        projectsContainer.style.display = 'none';
+                        this.textContent = 'Show All Projects';
+                    }
+                });
+            });
+        </script>
     </main>
 </body>
 </html>
